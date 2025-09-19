@@ -166,6 +166,7 @@ const getStockStatusColor = (status) => {
                 <form @submit.prevent="submitAdjustment">
                     <div class="mb-4">
                         <label class="block text-sm font-medium mb-2">Adjustment (+/-)</label>
+                        )
                         <input
                             type="number"
                             v-model="adjustmentForm.adjustment"
