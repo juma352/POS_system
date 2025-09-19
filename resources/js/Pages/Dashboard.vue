@@ -41,10 +41,10 @@ defineProps({
                 <!-- Quick Links -->
                 <div class="grid grid-cols-1 gap-6 mb-6 sm:grid-cols-2 lg:grid-cols-3">
                     <Link
-                        :href="route('sales.create')"
+                        :href="route('pos.index')"
                         class="p-6 text-center text-white bg-blue-500 rounded-lg shadow-sm hover:bg-blue-600"
                     >
-                        <h3 class="text-lg font-medium">New Sale</h3>
+                        <h3 class="text-lg font-medium">POS Terminal</h3>
                     </Link>
                     <Link
                         :href="route('products.index')"
@@ -53,10 +53,10 @@ defineProps({
                         <h3 class="text-lg font-medium">Products</h3>
                     </Link>
                     <Link
-                        :href="route('sales.index')"
+                        :href="route('inventory.index')"
                         class="p-6 text-center text-white bg-yellow-500 rounded-lg shadow-sm hover:bg-yellow-600"
                     >
-                        <h3 class="text-lg font-medium">Orders</h3>
+                        <h3 class="text-lg font-medium">Inventory</h3>
                     </Link>
                 </div>
 

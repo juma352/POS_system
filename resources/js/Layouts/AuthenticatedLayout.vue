@@ -45,6 +45,24 @@ const showingNavigationDropdown = ref(false);
                                 >
                                     Products
                                 </NavLink>
+                                <NavLink
+                                    :href="route('pos.index')"
+                                    :active="route().current('pos.index')"
+                                >
+                                    POS
+                                </NavLink>
+                                <NavLink
+                                    :href="route('inventory.index')"
+                                    :active="route().current('inventory.index')"
+                                >
+                                    Inventory
+                                </NavLink>
+                                <NavLink
+                                    :href="route('reports.index')"
+                                    :active="route().current('reports.*')"
+                                >
+                                    Reports
+                                </NavLink>
                             </div>
                         </div>
 
@@ -157,6 +175,24 @@ const showingNavigationDropdown = ref(false);
                             :active="route().current('products.index')"
                         >
                             Products
+                        </ResponsiveNavLink>
+                        <ResponsiveNavLink
+                            :href="route('pos.index')"
+                            :active="route().current('pos.index')"
+                        >
+                            POS
+                        </ResponsiveNavLink>
+                        <ResponsiveNavLink
+                            :href="route('inventory.index')"
+                            :active="route().current('inventory.index')"
+                        >
+                            Inventory
+                        </ResponsiveNavLink>
+                        <ResponsiveNavLink
+                            :href="route('reports.index')"
+                            :active="route().current('reports.*')"
+                        >
+                            Reports
                         </ResponsiveNavLink>
                     </div>
 

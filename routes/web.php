@@ -2,6 +2,9 @@
 
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\PosController;
+use App\Http\Controllers\InventoryController;
+use App\Http\Controllers\ReportsController;
 use Illuminate\Foundation\Application;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\SaleController;
@@ -32,6 +35,20 @@ Route::middleware('auth')->group(function () {
     Route::get('/sales/create', [SaleController::class, 'create'])->name('sales.create');
     Route::get('/sales', [SaleController::class, 'index'])->name('sales.index');
 
+    // POS Routes
+    Route::get('/pos', [PosController::class, 'index'])->name('pos.index');
+    Route::get('/pos/search', [PosController::class, 'searchProducts'])->name('pos.search');
+    Route::post('/pos/transaction', [PosController::class, 'processTransaction'])->name('pos.transaction');
+    
+    // Inventory Routes
+    Route::get('/inventory', [InventoryController::class, 'index'])->name('inventory.index');
+    Route::post('/inventory/{product}/adjust', [InventoryController::class, 'adjustStock'])->name('inventory.adjust');
+    Route::post('/inventory/bulk-update', [InventoryController::class, 'bulkUpdate'])->name('inventory.bulk-update');
+    
+    // Reports Routes
+    Route::get('/reports', [ReportsController::class, 'index'])->name('reports.index');
+    Route::get('/reports/sales', [ReportsController::class, 'salesReport'])->name('reports.sales');
+    Route::get('/reports/inventory', [ReportsController::class, 'inventoryReport'])->name('reports.inventory');
 });
 
 require __DIR__.'/auth.php';
