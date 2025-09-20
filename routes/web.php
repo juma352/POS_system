@@ -8,6 +8,7 @@ use App\Http\Controllers\ReportsController;
 use Illuminate\Foundation\Application;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\SaleController;
+use App\Http\Controllers\MpesaController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -49,6 +50,13 @@ Route::middleware('auth')->group(function () {
     Route::get('/reports', [ReportsController::class, 'index'])->name('reports.index');
     Route::get('/reports/sales', [ReportsController::class, 'salesReport'])->name('reports.sales');
     Route::get('/reports/inventory', [ReportsController::class, 'inventoryReport'])->name('reports.inventory');
+
+    // Mpesa Routes
+    Route::post('/mpesa/stk-push', [MpesaController::class, 'stkPush'])->name('mpesa.stk.push');
 });
+
+// Mpesa Callback - Should not have CSRF or auth middleware
+Route::post('/mpesa/callback', [MpesaController::class, 'mpesaCallback'])->name('mpesa.callback');
+
 
 require __DIR__.'/auth.php';

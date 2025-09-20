@@ -1,18 +1,21 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head, useForm } from '@inertiajs/vue3';
-import { ref, watch } from 'vue';
+import { ref, watch, computed } from 'vue';
 
 const form = useForm({
     product_id: '',
     quantity: 1,
     price: 0,
     payment_method: 'cash',
+    mpesa_phone: '', // New field for M-Pesa phone number
 });
 
 const searchQuery = ref('');
 const searchResults = ref([]);
 const selectedProduct = ref(null);
+const showMpesaPhoneInput = computed(() => form.payment_method === 'mpesa');
+const mpesaMessage = ref(''); // To display M-Pesa related messages
 
 const searchProducts = async () => {
     if (searchQuery.value.length > 2) {
@@ -35,14 +38,32 @@ const selectProduct = (product) => {
     searchResults.value = []; // Clear search results
 };
 
-const submit = () => {
-    form.post(route('sales.store'), {
-        onFinish: () => {
-            form.reset('product_id', 'quantity', 'price');
+const submit = async () => {
+    if (form.payment_method === 'mpesa') {
+        mpesaMessage.value = ''; // Clear previous messages
+        try {
+            const response = await axios.post('/api/mpesa/stkpush', {
+                amount: form.price * form.quantity, // Calculate total amount
+                phone: form.mpesa_phone,
+            });
+            mpesaMessage.value = response.data.message || 'STK Push initiated. Please check your phone.';
+            // Optionally, clear form or redirect after successful STK push initiation
+            form.reset('product_id', 'quantity', 'price', 'mpesa_phone');
             selectedProduct.value = null;
             searchQuery.value = '';
-        },
-    });
+        } catch (error) {
+            console.error('M-Pesa STK Push error:', error);
+            mpesaMessage.value = error.response?.data?.message || 'Failed to initiate M-Pesa STK Push.';
+        }
+    } else {
+        form.post(route('sales.store'), {
+            onFinish: () => {
+                form.reset('product_id', 'quantity', 'price');
+                selectedProduct.value = null;
+                searchQuery.value = '';
+            },
+        });
+    }
 };
 </script>
 
@@ -77,7 +98,7 @@ const submit = () => {
                                             @click="selectProduct(product)"
                                             class="cursor-pointer px-4 py-2 hover:bg-gray-100"
                                         >
-                                            {{ product.name }} (ID: {{ product.id }}) - ${{ product.price }}
+                                            {{ product.name }} (ID: {{ product.id }}) - KES {{ product.price }}
                                         </li>
                                     </ul>
                                 </div>
@@ -110,7 +131,6 @@ const submit = () => {
                                     min="0"
                                     :disabled="selectedProduct !== null" 
                                 /> <!-- Disable if product is selected -->
-                                />
                                 <div v-if="form.errors.price" class="text-red-500 text-xs mt-1">{{ form.errors.price }}</div>
                             </div>
 
@@ -124,8 +144,28 @@ const submit = () => {
                                     <option value="cash">Cash</option>
                                     <option value="card">Card</option>
                                     <option value="transfer">Transfer</option>
+                                    <option value="mpesa">M-Pesa</option> <!-- New M-Pesa option -->
                                 </select>
                                 <div v-if="form.errors.payment_method" class="text-red-500 text-xs mt-1">{{ form.errors.payment_method }}</div>
+                            </div>
+
+                            <!-- M-Pesa Phone Number Input -->
+                            <div v-if="showMpesaPhoneInput" class="mb-4">
+                                <label for="mpesa_phone" class="block text-sm font-medium text-gray-700">M-Pesa Phone Number</label>
+                                <input
+                                    type="text"
+                                    id="mpesa_phone"
+                                    v-model="form.mpesa_phone"
+                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+                                    placeholder="e.g., 2547XXXXXXXX"
+                                    required
+                                />
+                                <div v-if="form.errors.mpesa_phone" class="text-red-500 text-xs mt-1">{{ form.errors.mpesa_phone }}</div>
+                            </div>
+
+                            <!-- M-Pesa Message Display -->
+                            <div v-if="mpesaMessage" class="mb-4 p-3 rounded-md text-sm" :class="mpesaMessage.includes('success') ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'">
+                                {{ mpesaMessage }}
                             </div>
 
                             <div class="flex items-center justify-end mt-4">

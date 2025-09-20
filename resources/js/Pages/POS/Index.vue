@@ -85,19 +85,51 @@ const processTransaction = async () => {
         alert('Cart is empty');
         return;
     }
-    
-    if (amountPaid.value < total.value) {
-        alert('Insufficient payment amount');
+
+    if (paymentMethod.value === 'mpesa') {
+        await initiateMpesaPayment();
+    } else {
+        if (amountPaid.value < total.value) {
+            alert('Insufficient payment amount');
+            return;
+        }
+        await completeSale();
+    }
+};
+
+const initiateMpesaPayment = async () => {
+    if (!customerPhone.value) {
+        alert('Please enter customer phone number.');
         return;
     }
-    
+
     isProcessing.value = true;
-    
+
+    try {
+        await axios.post('/mpesa/stk-push', {
+            amount: total.value,
+            phone: customerPhone.value,
+        });
+
+        alert('STK push initiated. Ask the customer to check their phone to complete the payment.');
+        // Here you might want to start polling for the callback or wait for a webhook
+        // For now, we'll just complete the sale optimistically
+        await completeSale(true);
+
+    } catch (error) {
+        alert(error.response?.data?.message || 'M-Pesa STK push failed.');
+    } finally {
+        isProcessing.value = false;
+    }
+};
+
+const completeSale = async (isMpesa = false) => {
+    isProcessing.value = true;
     try {
         const response = await axios.post('/pos/transaction', {
             items: cart.value,
             payment_method: paymentMethod.value,
-            amount_paid: amountPaid.value,
+            amount_paid: isMpesa ? total.value : amountPaid.value,
             customer_phone: customerPhone.value,
             discount: discount.value
         });
@@ -310,10 +342,11 @@ onMounted(() => {
                                 
                                 <button
                                     @click="processTransaction"
-                                    :disabled="cart.length === 0 || isProcessing || amountPaid < total"
+                                    :disabled="cart.length === 0 || isProcessing || (paymentMethod !== 'mpesa' && amountPaid < total) || (paymentMethod === 'mpesa' && !customerPhone)"
                                     class="w-full bg-green-600 text-white py-3 px-4 rounded-lg font-semibold hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
                                 >
                                     <span v-if="isProcessing">Processing...</span>
+                                    <span v-else-if="paymentMethod === 'mpesa'">Initiate M-Pesa Payment</span>
                                     <span v-else>Complete Sale</span>
                                 </button>
                             </div>
